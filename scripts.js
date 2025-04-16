@@ -1,73 +1,47 @@
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f5f7fa;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  margin: 0;
-}
+const airdropContractAddress = '0x86a3Eb671910D6a5c83119891b4D306a2639D89F';
+const airdropContractABI = [
+  {
+    "inputs": [],
+    "name": "claimAirdrop",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
 
-.container {
-  background: white;
-  padding: 2rem 3rem;
-  border-radius: 20px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-}
+let web3;
+let userAddress;
 
-h1 {
-  color: #333;
-  font-size: 1.8rem;
-}
+document.getElementById('connect-wallet').addEventListener('click', async () => {
+  if (window.ethereum) {
+    try {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      web3 = new Web3(window.ethereum);
+      const accounts = await web3.eth.getAccounts();
+      userAddress = accounts[0];
+      document.getElementById('claim-airdrop').disabled = false;
+      alert(`钱包连接成功：${userAddress}`);
+    } catch (error) {
+      alert('连接钱包失败，请重试。');
+    }
+  } else {
+    alert('请安装 MetaMask 或其他兼容钱包插件。');
+  }
+});
 
-.highlight {
-  color: #4CAF50;
-  font-weight: bold;
-}
+document.getElementById('claim-airdrop').addEventListener('click', async () => {
+  if (!web3 || !userAddress) {
+    alert('请先连接钱包！');
+    return;
+  }
 
-p {
-  color: #666;
-  margin-top: 1rem;
-  font-size: 1rem;
-}
+  const contract = new web3.eth.Contract(airdropContractABI, airdropContractAddress);
 
-.buttons {
-  margin-top: 2rem;
-}
-
-button {
-  margin: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-#connect-wallet {
-  background: #2196F3;
-  color: white;
-}
-
-#connect-wallet:hover {
-  background: #1976D2;
-}
-
-#claim-airdrop {
-  background: #4CAF50;
-  color: white;
-}
-
-#claim-airdrop:hover {
-  background: #388E3C;
-}
-
-.note {
-  font-size: 0.9rem;
-  color: #999;
-  margin-top: 2rem;
-}
+  try {
+    await contract.methods.claimAirdrop().send({ from: userAddress });
+    alert('空投领取成功！🎉');
+  } catch (error) {
+    console.error(error);
+    alert('领取失败，请检查是否已领取或稍后再试。');
+  }
+});
