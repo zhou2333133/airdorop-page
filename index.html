@@ -1,25 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
+  <title>TEA 空投页面</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TEA 代币空投</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>欢迎参与 TEA 代币空投</h1>
+  <div class="container">
+    <h1>欢迎参与 <span class="highlight">TEA</span> 代币空投</h1>
     <p>请点击下方按钮连接您的钱包以领取空投。</p>
-  </header>
-  <main>
-    <button id="connect-wallet" class="btn-primary">连接钱包</button>
-    <button id="claim-airdrop" class="btn-secondary" disabled>领取空投</button>
-  </main>
-  <footer>
-    <p>如有疑问，请联系官方支持。</p>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+    <div class="buttons">
+      <button id="connect-wallet">连接钱包</button>
+      <button id="claim-airdrop" disabled>领取空投</button>
+    </div>
+    <p class="note">如有疑问，请联系官方支持。</p>
+  </div>
   <script src="scripts.js"></script>
 </body>
 </html>
-
