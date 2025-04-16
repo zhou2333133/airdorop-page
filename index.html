@@ -1,22 +1,147 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <title>TEA 空投页面</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.10.0/web3.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEA 空投领取</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+    }
+    h1 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #status {
+      margin-top: 1rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+    .notice {
+      margin-top: 2rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>欢迎参与 <span class="highlight">TEA</span> 代币空投</h1>
-    <p>请点击下方按钮连接您的钱包以领取空投。</p>
-    <div class="buttons">
-      <button id="connect-wallet">连接钱包</button>
-      <button id="claim-airdrop" disabled>领取空投</button>
+  <div class="card">
+    <h1>欢迎领取 TEA 代币空投</h1>
+    <button id="connectButton">连接钱包</button>
+    <button id="claimButton" style="display: none">领取空投</button>
+    <div id="status">请先连接钱包</div>
+    <div class="notice">
+      本站安全由 GitHub Pages 托管，钱包信息仅在本地使用，<br>请确保来源地址正确：https://zhou2333133.github.io/airdorop-page/
     </div>
-    <p class="note">如有疑问，请联系官方支持。</p>
   </div>
-  <script src="scripts.js"></script>
+
+  <script>
+    const web3 = new Web3(window.ethereum);
+    const airdropAddress = "0x86a3Eb671910D6a5c83119891b4D306a2639D89F";
+    const airdropABI = [
+      {
+        "inputs": [
+          { "internalType": "address", "name": "_token", "type": "address" },
+          { "internalType": "uint256", "name": "_amountPerClaim", "type": "uint256" }
+        ],
+        "name": "initialize",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "claim",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "remainingTokens",
+        "outputs": [
+          { "internalType": "uint256", "name": "", "type": "uint256" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          { "internalType": "address", "name": "account", "type": "address" }
+        ],
+        "name": "isClaimed",
+        "outputs": [
+          { "internalType": "bool", "name": "", "type": "bool" }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    const airdropContract = new web3.eth.Contract(airdropABI, airdropAddress);
+
+    document.getElementById("connectButton").addEventListener("click", async () => {
+      try {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const userAccount = accounts[0];
+        document.getElementById("connectButton").style.display = "none";
+        document.getElementById("claimButton").style.display = "inline-block";
+        document.getElementById("status").innerText = `钱包已连接：${userAccount.slice(0,6)}...${userAccount.slice(-4)}`;
+      } catch (error) {
+        document.getElementById("status").innerText = "钱包连接失败，请重试。";
+      }
+    });
+
+    document.getElementById("claimButton").addEventListener("click", async () => {
+      const accounts = await web3.eth.requestAccounts();
+      const userAccount = accounts[0];
+
+      document.getElementById("status").innerText = "正在领取空投...";
+
+      try {
+        await airdropContract.methods.claim().send({ from: userAccount });
+        document.getElementById("status").innerText = "🎉 空投领取成功！";
+      } catch (error) {
+        console.error(error);
+        document.getElementById("status").innerText = "❌ 领取失败，请稍后再试。";
+      }
+    });
+  </script>
 </body>
 </html>
