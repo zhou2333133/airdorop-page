@@ -1,7 +1,6 @@
-// scripts.js
-const airdropContractAddress = '0xYourAirdropContractAddress'; // 这里填入你的空投合约地址
+// 填写空投合约的地址和 ABI
+const airdropContractAddress = '0x86a3Eb671910D6a5c83119891b4D306a2639D89F'; // 你的空投合约地址
 const airdropContractABI = [
-  // 这里填入你的空投合约 ABI
   {
     "constant": true,
     "inputs": [],
