@@ -1,86 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airdrop Claim</title>
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEA 代币空投</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Claim Your MyToken (MTK) Airdrop</h1>
-    <button id="claimButton">Claim Tokens</button>
-
-    <script>
-        const web3 = new Web3(window.ethereum); // 使用 MetaMask 提供的 Web3
-        const airdropAddress = "0x86a3Eb671910D6a5c83119891b4D306a2639D89F"; // Airdrop 合约地址
-        const airdropABI = [
-            {
-                "inputs": [
-                    { "internalType": "address", "name": "_token", "type": "address" },
-                    { "internalType": "uint256", "name": "_amountPerClaim", "type": "uint256" }
-                ],
-                "name": "initialize",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "claim",
-                "outputs": [],
-                "stateMutability": "nonpayable",
-                "type": "function"
-            },
-            {
-                "inputs": [],
-                "name": "remainingTokens",
-                "outputs": [
-                    { "internalType": "uint256", "name": "", "type": "uint256" }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            },
-            {
-                "inputs": [
-                    { "internalType": "address", "name": "account", "type": "address" }
-                ],
-                "name": "isClaimed",
-                "outputs": [
-                    { "internalType": "bool", "name": "", "type": "bool" }
-                ],
-                "stateMutability": "view",
-                "type": "function"
-            }
-        ]; // Airdrop 合约的 ABI
-
-        const airdropContract = new web3.eth.Contract(airdropABI, airdropAddress);
-
-        // 连接钱包
-        window.ethereum.request({ method: 'eth_requestAccounts' })
-        .then(accounts => {
-            const userAccount = accounts[0]; // 用户钱包地址
-            console.log('Connected account:', userAccount);
-        });
-
-        // 点击领取按钮
-        document.getElementById("claimButton").addEventListener("click", async () => {
-            const accounts = await web3.eth.requestAccounts();
-            const userAccount = accounts[0];
-
-            // 调用空投合约的 claim 函数
-            await airdropContract.methods.claim().send({ from: userAccount })
-            .on('transactionHash', (hash) => {
-                console.log('Transaction sent with hash:', hash);
-            })
-            .on('receipt', (receipt) => {
-                console.log('Transaction successful:', receipt);
-                alert("You have successfully claimed your tokens!");
-            })
-            .on('error', (error) => {
-                console.error('Error:', error);
-                alert("An error occurred. Please try again.");
-            });
-        });
-    </script>
+  <header>
+    <h1>欢迎参与 TEA 代币空投</h1>
+    <p>请点击下方按钮连接您的钱包以领取空投。</p>
+  </header>
+  <main>
+    <button id="connect-wallet" class="btn-primary">连接钱包</button>
+    <button id="claim-airdrop" class="btn-secondary" disabled>领取空投</button>
+  </main>
+  <footer>
+    <p>如有疑问，请联系官方支持。</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/web3/dist/web3.min.js"></script>
+  <script src="scripts.js"></script>
 </body>
 </html>
+
