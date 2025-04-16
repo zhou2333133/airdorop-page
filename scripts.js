@@ -1,44 +1,73 @@
-// 填写空投合约的地址和 ABI
-const airdropContractAddress = '0x86a3Eb671910D6a5c83119891b4D306a2639D89F'; // 你的空投合约地址
-const airdropContractABI = [
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "claimAirdrop",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  }
-];
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f5f7fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
 
-document.getElementById('connect-wallet').addEventListener('click', async () => {
-  if (window.ethereum) {
-    try {
-      // 请求连接钱包
-      await window.ethereum.request({ method: 'eth_requestAccounts' });
-      document.getElementById('claim-airdrop').disabled = false;
-      alert('钱包连接成功！');
-    } catch (error) {
-      alert('连接钱包失败，请重试。');
-    }
-  } else {
-    alert('请安装 MetaMask 或其他支持的加密钱包。');
-  }
-});
+.container {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+}
 
-document.getElementById('claim-airdrop').addEventListener('click', async () => {
-  const web3 = new Web3(window.ethereum);
-  const accounts = await web3.eth.getAccounts();
-  const userAddress = accounts[0];
+h1 {
+  color: #333;
+  font-size: 1.8rem;
+}
 
-  const contract = new web3.eth.Contract(airdropContractABI, airdropContractAddress);
+.highlight {
+  color: #4CAF50;
+  font-weight: bold;
+}
 
-  try {
-    // 调用合约方法领取空投
-    await contract.methods.claimAirdrop().send({ from: userAddress });
-    alert('空投领取成功！');
-  } catch (error) {
-    alert('领取失败，请稍后再试。');
-  }
-});
+p {
+  color: #666;
+  margin-top: 1rem;
+  font-size: 1rem;
+}
+
+.buttons {
+  margin-top: 2rem;
+}
+
+button {
+  margin: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+#connect-wallet {
+  background: #2196F3;
+  color: white;
+}
+
+#connect-wallet:hover {
+  background: #1976D2;
+}
+
+#claim-airdrop {
+  background: #4CAF50;
+  color: white;
+}
+
+#claim-airdrop:hover {
+  background: #388E3C;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #999;
+  margin-top: 2rem;
+}
