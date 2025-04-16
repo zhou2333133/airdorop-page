@@ -2,77 +2,76 @@
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TEA 空投领取</title>
   <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * {
-      font-family: 'Inter', sans-serif;
-      box-sizing: border-box;
-    }
     body {
       margin: 0;
       padding: 0;
-      background: linear-gradient(to right, #f5f7fa, #c3cfe2);
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1b1b1b, #3a3a3a);
+      color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
     }
+
     .card {
-      background: white;
+      background: #292929;
       padding: 2rem;
-      border-radius: 16px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      border-radius: 1rem;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
       max-width: 400px;
-      width: 90%;
       text-align: center;
     }
-    h1 {
-      font-size: 1.8rem;
-      color: #333;
-      margin-bottom: 1rem;
-    }
+
     button {
-      background-color: #4CAF50;
+      background-color: #4caf50;
       color: white;
-      padding: 0.75rem 1.5rem;
+      padding: 0.8rem 1.5rem;
       border: none;
       border-radius: 8px;
-      font-size: 1rem;
       cursor: pointer;
+      font-size: 1rem;
       margin-top: 1rem;
     }
+
     button:hover {
       background-color: #45a049;
     }
-    #status {
+
+    .status {
       margin-top: 1rem;
       font-size: 0.95rem;
-      color: #555;
     }
-    .notice {
-      margin-top: 2rem;
-      font-size: 0.85rem;
-      color: #888;
+
+    h1 {
+      font-size: 1.8rem;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>欢迎领取 TEA 代币空投</h1>
-    <button id="connectButton">连接钱包</button>
-    <button id="claimButton" style="display: none">领取空投</button>
-    <div id="status">请先连接钱包</div>
-    <div class="notice">
-      本站安全由 GitHub Pages 托管，钱包信息仅在本地使用，<br>请确保来源地址正确：https://zhou2333133.github.io/airdorop-page/
-    </div>
+    <h1>欢迎参与 TEA 代币空投</h1>
+    <p>点击下方按钮连接钱包并领取 TEA 空投。</p>
+
+    <button id="connectBtn">连接钱包</button>
+    <button id="claimBtn" class="hidden">领取空投</button>
+    
+    <div id="status" class="status"></div>
+    <p style="margin-top: 1rem; font-size: 0.85rem; color: #aaa;">
+      本站不存储任何信息，领取需支付 Gas，请注意网络提示。
+    </p>
   </div>
 
   <script>
-    const web3 = new Web3(window.ethereum);
     const airdropAddress = "0x86a3Eb671910D6a5c83119891b4D306a2639D89F";
     const airdropABI = [
       {
@@ -95,53 +94,80 @@
       {
         "inputs": [],
         "name": "remainingTokens",
-        "outputs": [
-          { "internalType": "uint256", "name": "", "type": "uint256" }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          { "internalType": "address", "name": "account", "type": "address" }
-        ],
-        "name": "isClaimed",
-        "outputs": [
-          { "internalType": "bool", "name": "", "type": "bool" }
-        ],
+        "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
         "stateMutability": "view",
         "type": "function"
       }
     ];
 
-    const airdropContract = new web3.eth.Contract(airdropABI, airdropAddress);
+    const TEA_CHAIN_ID = "0x27DA"; // 10218 in hex
 
-    document.getElementById("connectButton").addEventListener("click", async () => {
+    let web3, userAccount, contract;
+
+    const connectBtn = document.getElementById("connectBtn");
+    const claimBtn = document.getElementById("claimBtn");
+    const status = document.getElementById("status");
+
+    connectBtn.addEventListener("click", async () => {
+      if (typeof window.ethereum === "undefined") {
+        status.innerText = "请安装 MetaMask 或支持 EVM 的钱包。";
+        return;
+      }
+
       try {
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const userAccount = accounts[0];
-        document.getElementById("connectButton").style.display = "none";
-        document.getElementById("claimButton").style.display = "inline-block";
-        document.getElementById("status").innerText = `钱包已连接：${userAccount.slice(0,6)}...${userAccount.slice(-4)}`;
-      } catch (error) {
-        document.getElementById("status").innerText = "钱包连接失败，请重试。";
+        await switchToTEANetwork();
+        await window.ethereum.request({ method: 'eth_requestAccounts' });
+        web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        userAccount = accounts[0];
+        contract = new web3.eth.Contract(airdropABI, airdropAddress);
+        connectBtn.classList.add("hidden");
+        claimBtn.classList.remove("hidden");
+        status.innerText = "钱包连接成功：" + userAccount;
+      } catch (err) {
+        status.innerText = "连接钱包失败：" + err.message;
       }
     });
 
-    document.getElementById("claimButton").addEventListener("click", async () => {
-      const accounts = await web3.eth.requestAccounts();
-      const userAccount = accounts[0];
+    claimBtn.addEventListener("click", async () => {
+      if (!contract || !userAccount) {
+        status.innerText = "请先连接钱包。";
+        return;
+      }
 
-      document.getElementById("status").innerText = "正在领取空投...";
+      status.innerText = "领取中，请确认钱包操作...";
 
       try {
-        await airdropContract.methods.claim().send({ from: userAccount });
-        document.getElementById("status").innerText = "🎉 空投领取成功！";
-      } catch (error) {
-        console.error(error);
-        document.getElementById("status").innerText = "❌ 领取失败，请稍后再试。";
+        const tx = await contract.methods.claim().send({ from: userAccount });
+        status.innerText = "领取成功！交易哈希：" + tx.transactionHash;
+      } catch (err) {
+        if (err.message.includes("gas")) {
+          status.innerText = "领取失败：可能已领取过，请检查网络。";
+        } else {
+          status.innerText = "领取失败：" + err.message;
+        }
       }
     });
-  </script>
-</body>
-</html>
+
+    async function switchToTEANetwork() {
+      const teaParams = {
+        chainId: TEA_CHAIN_ID,
+        chainName: 'Tea Sepolia',
+        nativeCurrency: {
+          name: 'TEA',
+          symbol: 'TEA',
+          decimals: 18
+        },
+        rpcUrls: ['https://rpc.testnet.tea.xyz'],
+        blockExplorerUrls: ['https://explorer.sepolia.tea.xyz']
+      };
+
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: TEA_CHAIN_ID }]
+        });
+      } catch (switchError) {
+        // 如果用户尚未添加该
+::contentReference[oaicite:8]{index=8}
+ 
